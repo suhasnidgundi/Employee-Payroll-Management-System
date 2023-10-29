@@ -3,9 +3,9 @@ from tkinter import ttk, messagebox
 import pymysql, os
 
 class EmployeeSystem:
-    def __init__(self, root):
+    def _init_(self, root):
         self.root = root
-        self.root.title("EMPLOYEE PAYROLL MANAGEMENT SYSTEM | DEVELOPED BY SUHAS NIDGUNDI |")
+        self.root.title("EMPLOYEE PAYROLL MANAGEMENT SYSTEM ")
         self.root.geometry("1350x700+0+0")
         self.root.config(bg="white")
         title = Label(self.root, text="Employee Payroll Management System", font=("calibri", 30, "bold"), bg="#262626", fg="white").place(x=0, y=0, relwidth=1)
@@ -46,7 +46,7 @@ class EmployeeSystem:
 
         lbl_code = Label(Frame1, text="Employee Code", font=("times new roman", 20), fg="black", bg="white").place(x=10, y=60)
         txt_code = Entry(Frame1, textvariable=self.var_emp_code, font=("times new roman", 15, "bold"), bg="lightgrey", fg="black").place(x=220, y=65, width=200)
-        btn_code = Button(Frame1, text="Search", activebackground="#2196f3", activeforeground="white", font=("consolos", 15, "bold"), bg="#262626", fg="white", cursor="hand2").place(x=440, y=62, height=30, width=100)
+        btn_code = Button(Frame1, text="Search", command=self.search_employee, activebackground="#2196f3", activeforeground="white", font=("consolos", 15, "bold"), bg="#262626", fg="white", cursor="hand2").place(x=440, y=62, height=30, width=100)
         
         # ========================== Row 1 ============================= #
         lbl_designation = Label(Frame1, text="Designation", font=("times new roman", 20), fg="black", bg="white").place(x=10, y=120)
@@ -128,7 +128,7 @@ class EmployeeSystem:
         txt_pf = Entry(Frame2, textvariable=self.var_pf, font=("times new roman", 15, "bold"), bg="lightgrey", fg="black").place(x=440, y=145, width=120)
 
         # ========================== Row 4 ============================= #
-        lbl_convence = Label(Frame2, text="Convence", font=("times new roman", 18), fg="black", bg="white").place(x=10, y=170)
+        lbl_convence = Label(Frame2, text="Convenience", font=("times new roman", 18), fg="black", bg="white").place(x=10, y=170)
         txt_convence = Entry(Frame2, textvariable=self.var_convence, font=("times new roman", 15, "bold"), bg="lightgrey", fg="black").place(x=170, y=175, width=120)
 
         lbl_n_salary = Label(Frame2, text="Net Salary", font=("times new roman", 20), fg="black", bg="white").place(x=310, y=170)
@@ -136,7 +136,7 @@ class EmployeeSystem:
 
         btn_calculate = Button(Frame2, text="Calculate", command=self.calculate, font=("consolos", 15, "bold"), bg="#262626", fg="white", activebackground="#607d8b", activeforeground="white", cursor="hand2").place(x=100, y=240, height=30, width=120)
         btn_save = Button(Frame2, text="Save", command=self.add_employee, font=("consolos", 15, "bold"), bg="#262626", fg="white", activebackground="#607d8b", activeforeground="white", cursor="hand2").place(x=230, y=240, height=30, width=120)
-        btn_clear = Button(Frame2, text="Clear", command=self.Clear, font=("consolos", 15, "bold"), bg="#262626", fg="white", activebackground="#607d8b", activeforeground="white", cursor="hand2").place(x=360, y=240, height=30, width=120)
+        btn_clear = Button(Frame2, text="Clear", command=self.clear, font=("consolos", 15, "bold"), bg="#262626", fg="white", activebackground="#607d8b", activeforeground="white", cursor="hand2").place(x=360, y=240, height=30, width=120)
     
         # ========================== Frame 3 ============================= #
         Frame3 = Frame(self.root, bd=3, bg="white", relief=RIDGE)
@@ -206,6 +206,53 @@ class EmployeeSystem:
 
         self.check_connection()
 
+    def search_employee(self):
+        try:
+            # Connect to the database
+            con = pymysql.connect(host="162.214.80.88", user="kssxkamy_nikhilthorat", password="NikhilThorat@5152", database="kssxkamy_nikhilthorat")
+
+            # Create a cursor object
+            cur = con.cursor()
+
+            emp_code = self.var_emp_code.get()
+
+            # print(emp_code)
+
+            # Execute a SELECT query to search for employees by name
+            cur.execute("SELECT * FROM emp_salary WHERE emp_code = %s", (emp_code))
+
+            # print(emp_code)
+
+            # Fetch and print the results
+            result = cur.fetchall()
+            if result:
+                for row in result:
+                    self.var_emp_code.set(row[0])
+                    self.var_name.set(row[1])
+                    self.var_designation.set(row[2])
+                    self.var_dob.set(row[3])
+                    self.var_doj.set(row[4])
+                    self.var_age.set(row[5])
+                    self.var_experience.set(row[6])
+                    self.var_gender.set(row[7])
+                    self.var_proof_id.set(row[8])
+                    self.var_email.set(row[9])
+                    self.var_contact.set(row[10])
+                    self.var_hr_location.set(row[11])
+                    self.var_status.set(row[12])
+                    self.txt_address.delete('1.0', END)
+                    self.txt_address.insert('1.0', row[13])
+                    # Print other employee attributes as needed
+            else:
+                messagebox.showerror("!!! ERROR 404 !!! Employee not found !!!")
+
+        except pymysql.Error as e:
+            messagebox.showerror(f"Error: {e}")
+
+        finally:
+            cur.close()
+            con.close()
+
     def calculate(self):
         if self.var_month.get()=="" or self.var_year.get()=="" or self.var_salary.get()=="" or self.var_t_days.get()=="" or self.var_absent.get()=="" or self.var_medical.get()=="" or self.var_pf.get()=="" or self.var_convence.get()=="":
             messagebox.showerror("!!! ERROR 404 !!!", "!!! *** ALL FIELDS ARE REQUIRED *** !!!")
@@ -223,16 +270,16 @@ class EmployeeSystem:
 
     def check_connection(self):
         try:
-            con = pymysql.connect(host="your_host", user="your_username", password="your_password", database="your_database_name")
+            con = pymysql.connect(host="162.214.80.88", user="kssxkamy_nikhilthorat", password="NikhilThorat@5152", database="kssxkamy_nikhilthorat")
             cur = con.cursor()
             cur.execute("SELECT * FROM emp_salary")
             rows = cur.fetchall()
-            print(rows)
+            # print(rows)
 
         except Exception as ex:
             messagebox.showerror("!!! ERROR 404 !!!", f"!!! ERROR DUE TO : {str(ex)}")
     
-    def Clear(self):
+    def clear(self):
         # ========================== Frame 1 ============================= #
         # ========================== All Variables ============================= #
         self.var_emp_code.set("")
@@ -264,31 +311,115 @@ class EmployeeSystem:
         self.txt_salary_reciept.delete('1.0', END)
     
     def print(self):
-        if self.var_emp_code.get()=="":
+        if self.var_emp_code.get() == "":
             messagebox.showerror("!!! ERROR 404 !!!", "!!! *** PLEASE ENTER EMPLOYEE ID *** !!!")
         else:
-            op = messagebox.askyesno("!!! SAVE RECIEPT !!!", "DO YOU WANT TO RECIEPT BILL ?")
-            if op>0:
-                self.reciept_data = self.txt_salary_reciept.get('1.0', END)
-                f1 = open("reciepts/" + str(self.var_emp_code.get())+".txt","w")
-                f1.write(self.reciept_data)
-                f1.close
-                messagebox.showinfo("!!! SAVED !!!", f"RECIEPT NO : {self.var_emp_code.get()} SAVED SUCCESSFULLY")
+            op = messagebox.askyesno("!!! SAVE RECEIPT !!!", "DO YOU WANT TO SAVE THE RECEIPT?")
+            if op > 0:
+                employee_info = f"Employee Code: {self.var_emp_code.get()}\n"
+                employee_info += f"Employee Designation: {self.var_designation.get()}\n"
+                employee_info += f"Employee Date Of Birth: {self.var_dob.get()}\n"
+                employee_info += f"Employee Name: {self.var_name.get()}\n"
+                employee_info += f"Employee Date Of Joining: {self.var_doj.get()}\n"
+                employee_info += f"Employee Age: {self.var_age.get()}\n"
+                employee_info += f"Employee Experience: {self.var_experience.get()}\n"
+                employee_info += f"Employee Gender: {self.var_gender.get()}\n"
+                employee_info += f"Employee ID Proof: {self.var_proof_id.get()}\n"
+                employee_info += f"Employee Email: {self.var_email.get()}\n"
+                employee_info += f"Employee Contact: {self.var_contact.get()}\n"
+                employee_info += f"Employee Hired Location: {self.var_hr_location.get()}\n"
+                employee_info += f"Employee Status: {self.var_status.get()}\n"
+                employee_info += f"Employee Address: {self.txt_address.get('1.0', END)}\n"
+
+                # Print the employee information in the txt_salary_reciept text widget
                 self.txt_salary_reciept.delete('1.0', END)
+                self.txt_salary_reciept.insert('1.0', employee_info)
+
+                # Save the information to a file
+                with open(f"reciepts/{self.var_emp_code.get()}.txt", "w") as f1:
+                    f1.write(employee_info)
+
+                messagebox.showinfo("!!! SAVED !!!", f"RECEIPT NO : {self.var_emp_code.get()} SAVED SUCCESSFULLY")
             else:
                 return
 
+
     def add_employee(self):
-        con = pymysql.connect(host="your_host", user="your_username", password="your_password", database="your_database_name")
+        con = pymysql.connect(host="162.214.80.88", user="kssxkamy_nikhilthorat", password="NikhilThorat@5152", database="kssxkamy_nikhilthorat")
         cur = con.cursor()
-        cur.execute("INSERT INTO emp_salary VALUES(%s)",(
-            self.var_name.get()
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS emp_salary (
+                emp_code INT AUTO_INCREMENT PRIMARY KEY,
+                emp_name VARCHAR(255),
+                emp_designation VARCHAR(255),
+                emp_dob DATE,
+                emp_doj DATE,
+                emp_age INT,
+                emp_experience INT,
+                emp_gender VARCHAR(10),
+                emp_id_proof VARCHAR(255),
+                emp_email VARCHAR(255),
+                emp_contact VARCHAR(15),
+                emp_hr_location VARCHAR(255),
+                emp_status VARCHAR(20),
+                emp_address TEXT
+            )
+        """)
+
+        # print("Employee Code : ",self.var_emp_code.get())
+        # print("Employee Designation : ",self.var_designation.get())
+        # print("Employee Date Of Birth : ",self.var_dob.get())
+        # print("Employee Name : ",self.var_name.get())
+        # print("Employee Date Of Joining : ",self.var_doj.get())
+        # print("Employee Age : ",self.var_age.get())
+        # print("Employee Experience : ",self.var_experience.get())
+        # print("Employee Gender : ",self.var_gender.get())
+        # print("Employee ID Proof : ",self.var_proof_id.get())
+        # print("Employee Email : ",self.var_email.get())
+        # print("Employee Contact : ",self.var_contact.get())
+        # print("Employee Hired Location : ",self.var_hr_location.get())
+        # print("Employee Status : ",self.var_status.get())
+        # print("Employee Address : ",self.txt_address.get(1.0, "end-1c"))
+
+
+        # Insert data into the 'emp_salary' table
+        cur.execute("""
+            INSERT INTO emp_salary (
+                emp_name,
+                emp_designation,
+                emp_dob,
+                emp_doj,
+                emp_age,
+                emp_experience,
+                emp_gender,
+                emp_id_proof,
+                emp_email,
+                emp_contact,
+                emp_hr_location,
+                emp_status,
+                emp_address
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            self.var_name.get(),
+            self.var_designation.get(),
+            self.var_dob.get(),
+            self.var_doj.get(),
+            self.var_age.get(),
+            self.var_experience.get(),
+            self.var_gender.get(),
+            self.var_proof_id.get(),
+            self.var_email.get(),
+            self.var_contact.get(),
+            self.var_hr_location.get(),
+            self.var_status.get(),
+            self.txt_address.get(1.0, "end-1c")
         ))
+
         con.commit()
         self.clear()
         con.close()
         messagebox.showinfo("!!! SUCCESS !!!", "!!! *** RECORD HAS BEEN INSERTED *** !!!")
-
 
 
 root = Tk()
